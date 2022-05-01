@@ -1,0 +1,14 @@
+#lang racket/gui
+
+(require racket/gui/base)
+
+(define gameframe (new frame%
+                   [label "TicTacToe"]
+                   [min-width 500]
+                   [min-height 500]
+                   [stretchable-width 1920]
+                   [stretchable-height 1080]))
+
+(define (TTT m n)
+  
+
