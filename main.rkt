@@ -50,5 +50,34 @@
     [else (evaluate-cols m (+ k 1) col cols rows)]
     )
 ))
-
-
+(define (evaluate m M N)
+    (if (or (evaluate-cols m 0 0 (- N 1) (- M 1)) (evaluate-rows m 0 0 (- M 1) (- N 1) ))
+    #t
+    #f
+    )
+)
+(define (ev-cell m i j M N player)
+    (if(< j N)
+        (if(= (get m i j) 0)
+            (and (set m i j player)
+            (if (evaluate m M N)
+                1
+                (and (set m i j 0) (ev-cell m i (+ j 1) M N player))
+            ))
+            (and (set m i j 0) (ev-cell m i (+ j 1) M N player))
+        )
+        0
+    )
+)
+(define (traverse m i M N player)
+    (if (< i N)
+        (if(= (ev-cell m i 0 M N player) 0)
+            (traverse m (+ i 1) M N)
+            (ev-cell m i 0 M N player)
+        )
+        0
+    )
+)
+(define m (make 3 3))
+m
+(traverse m 0 3 3 1)
