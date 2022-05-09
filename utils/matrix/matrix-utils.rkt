@@ -7,11 +7,15 @@
         (vector-set! m i (make-vector columns)))
 ))
 
-(define get (lambda (m i j)
+(define get 
+  (lambda (m i j)
     (vector-ref (vector-ref m i) j)
-))
+  )
+)
 
-(define set (lambda (m i j x)
-    (vector-set! (vector-ref m i) j x)
-))
+(define set
+  (lambda (m i j x)
+    (vector-set! (vector-ref m i) j x)  
+  ) 
+)
 (provide (all-defined-out))
