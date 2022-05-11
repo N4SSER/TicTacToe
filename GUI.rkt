@@ -1,14 +1,32 @@
 #lang racket/gui
 (require racket/gui/base)
+(require "utils/matrix/matrix-utils.rkt")
 
 (define canvas-matrix #f)
 (define numeric-matrix #f)
+(define numero-filas #f)
+(define numero-columnas #f)
+
 ; Custom canvas
 (define c%
   (class canvas%
-    
+    (define fila #f)
+    (define columna #f)
     (define symbol "♦")
-    (define (change-symbol new-symb)
+
+    (define/public set-fila (lambda (number)
+      (set! fila number)
+      "fila set"))
+    (define/public (get-fila)
+      fila)
+    
+    (define/public set-columna (lambda (number)
+      (set! columna number)
+      "culumna set"))
+    (define/public (get-columna)
+          columna)
+
+    (define (set-symbol new-symb)
       (set! symbol new-symb))
     (define (get-symbol)
       symbol)
@@ -24,7 +42,7 @@
       (when (is-a? ev mouse-event%)
         "MOUSE EVENT"
         (when (send ev get-left-down)
-          (change-symbol "O")
+          (set-symbol "O")
           (send this refresh-now))))
     (super-instantiate ())
   ))
@@ -192,16 +210,23 @@
 (define cells (list row1cells row2cells row3cells row4cells row5cells row6cells row7cells row8cells row9cells row10cells))
 "DEFINED CELLS LIST"
 
-(define (make-canvas row n parent)
+(define (make-canvas row m n parent)
   (cond 
     ((equal? n 0) 0)
     (else
       (define curr-cell (car row))
       (send parent add-child curr-cell)
       (send curr-cell refresh-now)
-      (make-canvas (cdr row) (- n 1) parent)
+      (send curr-cell set-fila (- numero-filas m))
+      (send curr-cell set-columna (- numero-columnas n))
+      
+      (send curr-cell get-fila)
+      (send curr-cell get-columna)
+      (make-canvas (cdr row) m (- n 1) parent)
     )
   ))
+
+
 "DEFINED MAKE-CANVAS FUNCTION"
 
 (define (make-board-aux m n panels canvases)
@@ -209,7 +234,7 @@
   (cond 
     ((equal? m 0) 0)
     (else (send gameframe add-child (car panels))
-      (make-canvas (car canvases) n (car panels))
+      (make-canvas (car canvases) m n (car panels))
       (make-board-aux (- m 1) n (cdr panels) (cdr canvases))
     )
   )
@@ -228,5 +253,6 @@
         ((< n 3) (send incorrect-dimension show #t))
         ((> m 10) (send incorrect-dimension show #t))
         ((> n 10) (send incorrect-dimension show #t))
-        (else (make-board m n) (send gameframe show #t))))
+        (else (set! numero-filas m) (set! numero-columnas n) (make-board m n) (send gameframe show #t))))
 "DEFINED TTT FUNCTION"
+
