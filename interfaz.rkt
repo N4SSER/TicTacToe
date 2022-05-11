@@ -1,24 +1,31 @@
 #lang racket/gui
 (require racket/gui/base)
 
+(define canvas-matrix #f)
+(define numeric-matrix #f)
+; Custom canvas
 (define c%
   (class canvas%
     
-    (define symbol "-")
+    (define symbol "♦")
     (define (change-symbol new-symb)
       (set! symbol new-symb))
     (define (get-symbol)
       symbol)
     (define/override on-paint
       (lambda ()
-        (send (send this get-dc) scale 3 3)
+        
         (send (send this get-dc) set-text-foreground "blue")
         (send (send this get-dc) draw-text symbol 0 0)
         )
       )
+
     (define/override (on-event ev)
       (when (is-a? ev mouse-event%)
-        (when (send ev get-left-down) "O")))
+        "MOUSE EVENT"
+        (when (send ev get-left-down)
+          (change-symbol "O")
+          (send this refresh-now))))
     (super-instantiate ())
   ))
 
@@ -31,7 +38,7 @@
                    [stretchable-height 1080]))
 "DEFINED GAMEFRAME"
 
-;;Dialog when the user innputs incorrect dimensions for the game setup
+;;Dialog when the user inputs incorrect dimensions for the game setup
 (define incorrect-dimension (new dialog%
                                  [label "Incorrect Dimensions"]
                                  [parent gameframe]
