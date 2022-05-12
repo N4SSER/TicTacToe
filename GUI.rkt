@@ -3,7 +3,7 @@
 (require "utils/matrix/matrix-utils.rkt")
 (require "utils/cpu-moves.rkt")
 
-
+;;global variables
 (define canvas-matrix #f)
 (define numeric-matrix #f)
 (define numero-filas #f)
@@ -12,30 +12,37 @@
 (define player-symbol -1)
 
 
-; Custom canvas
+; Custom canvas to handle the changes of symbol with mouse events and have row and column attributes
 (define c%
   (class canvas%
     (define fila #f)
     (define columna #f)
     (define symbol "/")
 
+    ;;setter for fila
     (define/public (set-fila number)
       (set! fila number)
       "fila set")
+    ;;getter for fila
     (define/public (get-fila)
       fila)
     
+    ;;setter for culumna
     (define/public (set-columna number)
       (set! columna number)
       "culumna set")
-
+    ;;getter for columna
     (define/public (get-columna)
           columna)
 
+    ;;sets the symbol
+    ;;param: new-symb-> new symbol in string format
     (define/public (set-symbol new-symb)
       (set! symbol new-symb))
     (define/public (get-symbol)
       symbol)
+
+    ;;paints the designated symbol on the canvas when the screen refreshes
     (define/override on-paint
       (lambda ()
         
@@ -44,6 +51,7 @@
         )
       )
 
+    ;; overrides on-event to change the symbol on an available canvas with the player's symbol
     (define/override (on-event ev)
       (when (is-a? ev mouse-event%)
         (when (send ev get-left-down)
@@ -223,6 +231,8 @@
 
 (define cells (list row1cells row2cells row3cells row4cells row5cells row6cells row7cells row8cells row9cells row10cells))
 "DEFINED CELLS LIST"
+
+
 (define (gui-to-matrix-aux matrix i j n curr-row)
   (cond 
     (
@@ -251,6 +261,11 @@
 
 )
 
+;;name: gui-to-matrix
+;;param: matrix-> matrix implemented with vectors, i/j-> iterators initialized in 0, m->number of
+;;       rows of the matrix, n-> number of columns of the matrix, canvas-matrix->matrix with canvases
+;;       that represent cells 
+;;description: translates the game's gui in a numeric matrix
 (define (gui-to-matrix matrix i j m n canvas-matrix)
   (cond 
     (
@@ -289,7 +304,11 @@
       )
       (matrix-to-gui-aux matrix (cdr curr-row) i (+ j 1) n)
     )))
-
+;;name: matrix-to-gui
+;;param: matrix-> matrix implemented with vectors, i/j-> iterators initialized in 0, m->number of
+;;       rows of the matrix, n-> number of columns of the matrix, canvas-matrix->matrix with canvases
+;;       that represent cells 
+;;description: translates a numeric matrix to the game's gui 
 (define (matrix-to-gui matrix canvas-matrix i j m n)
   (cond
     (
@@ -302,6 +321,10 @@
     )
   )
   )
+
+;;name: make-canvas
+;;param: row->list of canvases, m->row number, n->column number/iterator, parent->parent panel of the canvas
+;;description: makes canvases visible when in the list and the range
 (define (make-canvas row m n parent)
   (cond 
     ((equal? n 0) 0)
@@ -328,7 +351,9 @@
 )
 
 "DEFINED MAKEBOARDAUX FUNCTION"
-
+;;name: make-board
+;;param: m->row number, n->column number
+;;description: makes horizontal panels in the specific list visible within range
 (define (make-board m n)
   (make-board-aux m n rows cells)
 )
