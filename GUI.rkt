@@ -6,27 +6,30 @@
 (define numeric-matrix #f)
 (define numero-filas #f)
 (define numero-columnas #f)
+(define cpu-symbol -1)
+
 
 ; Custom canvas
 (define c%
   (class canvas%
     (define fila #f)
     (define columna #f)
-    (define symbol "♦")
+    (define symbol "/")
 
-    (define/public set-fila (lambda (number)
+    (define/public (set-fila number)
       (set! fila number)
-      "fila set"))
+      "fila set")
     (define/public (get-fila)
       fila)
     
-    (define/public set-columna (lambda (number)
+    (define/public (set-columna number)
       (set! columna number)
-      "culumna set"))
+      "culumna set")
+
     (define/public (get-columna)
           columna)
 
-    (define (set-symbol new-symb)
+    (define/public (set-symbol new-symb)
       (set! symbol new-symb))
     (define (get-symbol)
       symbol)
@@ -40,10 +43,11 @@
 
     (define/override (on-event ev)
       (when (is-a? ev mouse-event%)
-        "MOUSE EVENT"
         (when (send ev get-left-down)
-          (set-symbol "O")
-          (send this refresh-now))))
+          (cond ((not (equal? symbol "X"))  (set-symbol "O")))
+          (send this refresh-now)
+          (displayln (get-fila))
+          (displayln (get-columna)))))
     (super-instantiate ())
   ))
 
@@ -210,6 +214,36 @@
 (define cells (list row1cells row2cells row3cells row4cells row5cells row6cells row7cells row8cells row9cells row10cells))
 "DEFINED CELLS LIST"
 
+(define (matrix-to-gui-aux matrix curr-row i j n)
+  (cond 
+    (
+      (equal? j n)
+      0
+    )
+    (else
+      (define curr-cell (car curr-row))
+      (define m-symbol (get numeric-matrix i j))
+      (cond 
+        (
+          (equal? m-symbol cpu-symbol)
+          (send curr-cell set-symbol "X")
+        )
+      )
+      (matrix-to-gui-aux matrix (cdr curr-row) i (+ j 1) n)
+    )))
+
+(define (matrix-to-gui matrix canvas-matrix i j m n)
+  (cond
+    (
+      (equal? i m)
+    0
+    )
+    (else
+      (matrix-to-gui-aux matrix (car canvas-matrix) i j n)
+      (matrix-to-gui matrix (cdr canvas-matrix) (+ i 1) 0 m n)
+    )
+  )
+  )
 (define (make-canvas row m n parent)
   (cond 
     ((equal? n 0) 0)
@@ -219,14 +253,9 @@
       (send curr-cell refresh-now)
       (send curr-cell set-fila (- numero-filas m))
       (send curr-cell set-columna (- numero-columnas n))
-      
-      (send curr-cell get-fila)
-      (send curr-cell get-columna)
       (make-canvas (cdr row) m (- n 1) parent)
     )
   ))
-
-
 "DEFINED MAKE-CANVAS FUNCTION"
 
 (define (make-board-aux m n panels canvases)
@@ -253,6 +282,6 @@
         ((< n 3) (send incorrect-dimension show #t))
         ((> m 10) (send incorrect-dimension show #t))
         ((> n 10) (send incorrect-dimension show #t))
-        (else (set! numero-filas m) (set! numero-columnas n) (make-board m n) (send gameframe show #t))))
+        (else (set! numero-filas m) (set! numero-columnas n) (set! numeric-matrix (make numero-filas numero-columnas)) (displayln numeric-matrix)(make-board m n) (send gameframe show #t))))
 "DEFINED TTT FUNCTION"
 
