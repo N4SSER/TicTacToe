@@ -1,12 +1,15 @@
 #lang racket/gui
 (require racket/gui/base)
 (require "utils/matrix/matrix-utils.rkt")
+(require "utils/cpu-moves.rkt")
+
 
 (define canvas-matrix #f)
 (define numeric-matrix #f)
 (define numero-filas #f)
 (define numero-columnas #f)
-(define cpu-symbol -1)
+(define cpu-symbol 1)
+(define player-symbol -1)
 
 
 ; Custom canvas
@@ -31,7 +34,7 @@
 
     (define/public (set-symbol new-symb)
       (set! symbol new-symb))
-    (define (get-symbol)
+    (define/public (get-symbol)
       symbol)
     (define/override on-paint
       (lambda ()
@@ -44,10 +47,17 @@
     (define/override (on-event ev)
       (when (is-a? ev mouse-event%)
         (when (send ev get-left-down)
-          (cond ((not (equal? symbol "X"))  (set-symbol "O")))
+          (cond 
+            (
+              (not (equal? symbol "O"))  
+              (set-symbol "X") 
+              (gui-to-matrix numeric-matrix 0 0 numero-filas numero-columnas canvas-matrix)
+              (next-move numeric-matrix 0 0 numero-filas numero-columnas 1 -1 '(-1 -1))
+              (matrix-to-gui numeric-matrix canvas-matrix 0 0 numero-filas numero-columnas)
+            )
+          )
           (send this refresh-now)
-          (displayln (get-fila))
-          (displayln (get-columna)))))
+          )))
     (super-instantiate ())
   ))
 
@@ -213,6 +223,46 @@
 
 (define cells (list row1cells row2cells row3cells row4cells row5cells row6cells row7cells row8cells row9cells row10cells))
 "DEFINED CELLS LIST"
+(define (gui-to-matrix-aux matrix i j n curr-row)
+  (cond 
+    (
+      (equal? j n)
+      0
+    )
+    (else
+      (define curr-cell (car curr-row))
+      (define m-symbol (send curr-cell get-symbol))
+      (cond 
+        (
+          (equal? m-symbol "X")
+          (set matrix i j -1)
+        )
+        (
+          (equal? m-symbol "O")
+          (set matrix i j 1)
+        )
+        (else
+          (set matrix i j 0)
+        )
+      )
+      (gui-to-matrix-aux matrix i (+ j 1) n (cdr curr-row))
+    )
+  )
+
+)
+
+(define (gui-to-matrix matrix i j m n canvas-matrix)
+  (cond 
+    (
+      (equal? i m)
+      (displayln numeric-matrix)
+    )
+    (else
+      (gui-to-matrix-aux matrix i 0 n (car canvas-matrix))
+      (gui-to-matrix matrix (+ i 1) 0 m n (cdr canvas-matrix))
+    )
+  )
+)
 
 (define (matrix-to-gui-aux matrix curr-row i j n)
   (cond 
@@ -226,7 +276,15 @@
       (cond 
         (
           (equal? m-symbol cpu-symbol)
+          (send curr-cell set-symbol "O")
+          (send curr-cell refresh-now)
+        ) 
+        (
+          (equal? m-symbol player-symbol)
           (send curr-cell set-symbol "X")
+        )
+        (else
+          (send curr-cell set-symbol "/")
         )
       )
       (matrix-to-gui-aux matrix (cdr curr-row) i (+ j 1) n)
@@ -239,7 +297,7 @@
     0
     )
     (else
-      (matrix-to-gui-aux matrix (car canvas-matrix) i j n)
+      (matrix-to-gui-aux matrix (car canvas-matrix) i 0 n)
       (matrix-to-gui matrix (cdr canvas-matrix) (+ i 1) 0 m n)
     )
   )
@@ -282,6 +340,6 @@
         ((< n 3) (send incorrect-dimension show #t))
         ((> m 10) (send incorrect-dimension show #t))
         ((> n 10) (send incorrect-dimension show #t))
-        (else (set! numero-filas m) (set! numero-columnas n) (set! numeric-matrix (make numero-filas numero-columnas)) (displayln numeric-matrix)(make-board m n) (send gameframe show #t))))
+        (else (set! numero-filas m) (set! numero-columnas n)  (set! canvas-matrix cells) (set! numeric-matrix (make numero-filas numero-columnas)) (displayln numeric-matrix)(make-board m n) (send gameframe show #t))))
 "DEFINED TTT FUNCTION"
 
