@@ -47,6 +47,8 @@
     )
 )
 
+;;Evaluates if there exists 3 in a row on diagonals, columns or rows. previously it is tested if the cell 
+;; of the possible candidate can win, if so, the cell is framed with the player in turn and returns true.
 (define evaluate 
     (lambda (m M N player i j defense)
         (and (set m i j player)
@@ -59,6 +61,9 @@
     )
 )
 
+;;It is in charge of making the next movement of the cpu, if it can win in the current cell, it will 
+;;make the movement, if not, it will test if it can at least avoid losing, if not, it will choose 
+;;another candidate
 (define next-move 
     (lambda (m i j rows cols player oponent pos)
         (cond
